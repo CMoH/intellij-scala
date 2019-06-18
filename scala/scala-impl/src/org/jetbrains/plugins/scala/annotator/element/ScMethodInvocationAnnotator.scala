@@ -7,8 +7,10 @@ import org.jetbrains.plugins.scala.annotator.AnnotatorUtils.registerTypeMismatch
 import org.jetbrains.plugins.scala.annotator.createFromUsage.{CreateApplyQuickFix, InstanceOfClass}
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScReference
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{MethodInvocation, ScMethodCall}
+import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
-import org.jetbrains.plugins.scala.lang.psi.types.{ApplicabilityProblem, DefaultTypeParameterMismatch, DoesNotTakeParameters, ExcessArgument, ExpansionForNonRepeatedParameter, ExpectedTypeMismatch, MalformedDefinition, MissedValueParameter, ParameterSpecifiedMultipleTimes, PositionalAfterNamedArgument, TypeMismatch, UnresolvedParameter}
+import org.jetbrains.plugins.scala.lang.psi.types._
+import org.jetbrains.plugins.scala.lang.resolve.ScalaResolveResult
 import org.jetbrains.plugins.scala.project.ProjectContext
 import org.jetbrains.plugins.scala.extensions._
 
@@ -32,6 +34,7 @@ object ScMethodInvocationAnnotator extends ElementAnnotator[MethodInvocation] {
     call.getEffectiveInvokedExpr match {
       case ref: ScReference =>
         ref.bind() match {
+          case Some(ScalaResolveResult(_: ScParameter, _)) => ()
           case Some(r) if r.notCheckedResolveResult || r.isDynamic => //it's unhandled case
           case _ =>
             call.applyOrUpdateElement match {
