@@ -206,8 +206,6 @@ object ScalaTestAstTransformer {
 
     current.getInvokedExpr match {
       case ref: ScReferenceExpression =>
-        val target: AstNode = getTarget(className, current, selected)
-
         val member = ref.resolve() match {
           case member: ScMember => Some(member)
           case pattern: ScBindingPattern =>
@@ -219,6 +217,8 @@ object ScalaTestAstTransformer {
         }
 
         val containingClassName = member.flatMap(_.containingClass.toOption).map(_.qualifiedName).orNull
+
+        val target: AstNode = getTarget(containingClassName, current, selected)
 
         val argsAst = arguments.map {
           case literal: ScLiteral if literal.isString =>
@@ -347,7 +347,7 @@ object ScalaTestAstTransformer {
                                    override val args: Array[AstNode])
     extends org.scalatest.finders.MethodInvocation(pClassName, pTarget, null, new Array[AstNode](0), pName, args: _*) {
 
-    override def parent: AstNode = getParentNode(pClassName, invocation)
+    override def parent: AstNode =  getParentNode(pClassName, invocation)
 
     override def children: Array[AstNode] = getChildren(pClassName, invocation)
 
